@@ -1,0 +1,57 @@
+<html>
+<head>
+  <script type="text/javascript" src="data.json"></script>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.7.0/vis.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.7.0/vis.min.css"></link>
+</head>
+<body>
+<div id="visualization"></div>
+
+<script type="text/javascript">
+
+  var container = document.getElementById('visualization');
+  var groups = new vis.DataSet();
+  groups.add({
+    id: 'meanLatency',
+    content: 'Mean Latency',
+    options: {
+      drawPoints: false,
+      interpolation: false
+    }
+  });
+  groups.add({
+    id: 'qps',
+    content: 'QPS',
+    options: {
+      drawPoints: false,
+      yAxisOrientation: 'right',
+      interpolation: false
+    }
+  });
+  var items = [ ];
+  for(var i=0; i < testdata.length; i++) {
+    items.push({x: new Date(0).setUTCSeconds(testdata[i].timestamp), y: testdata[i].results_averaged.latency_mean, group: "meanLatency"});
+    items.push({x: new Date(0).setUTCSeconds(testdata[i].timestamp), y: testdata[i].results_averaged.summary_requests/(testdata[i].results_averaged.summary_duration/1000000), group: "qps"});
+  }
+
+  var dataset = new vis.DataSet(items);
+
+  var options = {
+        legend: {left:{position:"bottom-left"}},
+        style:'bar',
+        barChart: {width:50, align:'center', sideBySide:true},
+        dataAxis: {
+        left: {
+            range: {min:0}
+        },
+        right: {
+            range: {min:0}
+        }
+    }
+    };
+
+  var graph2d = new vis.Graph2d(container, dataset, groups, options);
+</script>
+</body>
+</html>
