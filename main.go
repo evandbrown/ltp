@@ -182,5 +182,17 @@ func getObjectContents(o *storage.Object) ([]byte, error) {
 
 func listObjects(bucket string, delimeter string, prefix string) (*storage.Objects, error) {
 	os := storage.NewObjectsService(s)
-	return os.List(bucket).Prefix(prefix).Delimiter(delimeter).Do()
+	objects, err := os.List(bucket).MaxResults(10000).Prefix(prefix).Delimiter(delimeter).Do()
+	if err != nil {
+		return objects, err
+	}
+	for objects.NextPageToken != "" {
+		page, err := os.List(bucket).MaxResults(10000).Prefix(prefix).Delimiter(delimeter).PageToken(objects.NextPageToken).Do()
+		if err != nil {
+			return page, err
+		}
+		objects.Items = append(objects.Items, page.Items...)
+		objects.NextPageToken = page.NextPageToken
+	}
+	return objects, nil
 }
